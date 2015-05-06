@@ -7,6 +7,7 @@ import (
 )
 
 type Frame map[string][]string
+type RawData [][]string
 
 func ReadCSV(filename string) Frame {
 	file, err := os.Open(filename)
@@ -21,7 +22,15 @@ func ReadCSV(filename string) Frame {
 	if err != nil {
 		fmt.Println(err)
 	}
+	return DataFrame(raw)
+}
 
+////////////////////////////////////////////////////////////////////////////////
+// CREATEFRAME
+// 														       				  //
+// 																			  //
+////////////////////////////////////////////////////////////////////////////////
+func DataFrame(raw [][]string) Frame {
 	df := Frame{}
 	for k, head := range raw[0] {
 		df[head] = []string{}
@@ -33,8 +42,10 @@ func ReadCSV(filename string) Frame {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// ROW
 // Returns a row of data based on a given row number.       				  //
 // For example, calling df.Row(x) would return a slice of data from that row. //
+////////////////////////////////////////////////////////////////////////////////
 func (df Frame) Row(num int) (row []string) {
 	for _, each := range df {
 		row = append(row, each[num])
@@ -43,8 +54,10 @@ func (df Frame) Row(num int) (row []string) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// ROWS
 // Returns a set row of data based on a range of row numbers.       		  //
 // For example, calling df.Rows(x,y) would...								  //
+////////////////////////////////////////////////////////////////////////////////
 func (df Frame) Rows(x, y int) (rows [][]string) {
 	for ; x < y; x++ {
 		var row []string
@@ -57,10 +70,14 @@ func (df Frame) Rows(x, y int) (rows [][]string) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Returns a set row of data based on a range of row numbers.       		  //
+// TOP														        		  //
+// Returns a set row of data based on a range of row numbers.
 // For example, calling df.Rows(x,y) would...								  //
-func (df Frame) Top(num int) {
-	fmt.Println(df.Rows(0, num))
+////////////////////////////////////////////////////////////////////////////////
+func (df Frame) Top(num int) Frame {
+	raw := df.Rows(0, num)
+	fmt.Println(raw)
+	return DataFrame(raw)
 }
 
 func (df Frame) Describe() Frame {
@@ -81,6 +98,18 @@ func (df Frame) Rename(current, future string) Frame {
 	return df
 }
 
+func (df1 Frame) Copy() Frame {
+	// currently shares memory
+	// goal: return frame with new memory
+	df2 := df1
+	return df2
+}
+
+func (df Frame) Raw() { // [][]string
+	headers := df.Headers()
+	fmt.Println(headers)
+}
+
 // func (df Frame) Headers() map[int]string {
 // 	// headers := []string{}
 // 	headers := map[int]string{}
@@ -92,10 +121,26 @@ func (df Frame) Rename(current, future string) Frame {
 // 	return headers
 // }
 
+func (df Frame) Length() {
+	fmt.Println("")
+}
+
 func main() {
-	df := ReadCSV("crime.csv")
-	df.Rename("Year", "YEAR")
-	// fmt.Println(df.Headers())
-	fmt.Println(df["YEAR"])
+	df1 := ReadCSV("crime.csv")
+	// df2 := df1.Copy()
+	// df2.Rename("Year", "Smoochies")
+	// fmt.Println(df1.Headers(), df2.Headers())
+	// fmt.Println(df["YEAR"])
+	// fmt.Println(df1.Raw())
+
+	// var raw [][]string
+	// headers := []string{}
+	// for k, v := range df1 {
+	// 	fmt.Println(k, v)
+	// 	headers = append(headers, k)
+	// 	raw = append(raw, v)
+	// }
+
+	fmt.Println(len(df1["Year"]))
 
 }
